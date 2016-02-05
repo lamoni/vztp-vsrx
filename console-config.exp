@@ -1,0 +1,120 @@
+#!/usr/bin/expect -f
+
+########
+#Created with and for vSRX-12.1.  YMMV on other devices
+#2/3/16
+########
+
+#uncomment below to enable debugging to terminal
+#exp_internal 1
+
+# etc.) and devices discard or ignore keystrokes that arrive "too
+# quickly" after prompts.  If you find your new script hanging up at
+# one spot, try adding a short sleep just before the previous send.
+# Setting "force_conservative" to 1 (see below) makes Expect do this
+# automatically - pausing briefly before sending each character.  This
+# pacifies every program I know of.  The -c flag makes the script do
+# this in the first place.  The -C flag allows you to define a
+# character to toggle this mode off and on.
+
+set force_conservative 0  ;# set to 1 to force conservative mode even if
+			  ;# script wasn't run conservatively originally
+if {$force_conservative} {
+	set send_slow {1 .1}
+	proc send {ignore arg} {
+		sleep .1
+		exp_send -s -- $arg
+	}
+}
+
+#
+# 2) differing output - Some programs produce different output each time
+# they run.  The "date" command is an obvious example.  Another is
+# ftp, if it produces throughput statistics at the end of a file
+# transfer.  If this causes a problem, delete these patterns or replace
+# them with wildcards.  An alternative is to use the -p flag (for
+# "prompt") which makes Expect only look for the last line of output
+# (i.e., the prompt).  The -P flag allows you to define a character to
+# toggle this mode off and on.
+#
+# Read the man page for more info.
+
+# Arguments
+set srx_ip [lindex $argv 0]
+set srx_root_password [lindex $argv 1];
+set telnet_port [lindex $argv 2];
+
+
+set timeout -1
+match_max 100000
+##Open telnet to terminal/console server
+spawn nc -l $telnet_port
+
+#############
+##Optional zeroize device prior to configuration
+##Comment out to not zeroize
+#############
+sleep 1;
+expect "login:"
+send "root\r"
+## Uncomment below if device has a previous password
+#expect "password"
+#send "<YOUR PASSWORD HERE>\r"
+send -- "cli\r"
+expect "root>"
+send "request system zeroize\r"
+expect "yes"
+send "yes\r"
+##Allow time for a reboot
+#sleep 120;
+##End optional Zeroize
+
+
+##############
+##Start automatic configuration
+##############
+
+#expect "Connected"
+expect "Amnesiac (tty"
+send "\r";
+## sleep is for waiting for a response from device.  This may need to change based upon latency to terminal server 
+sleep 1;
+expect "login:"
+send "root\r"
+sleep 2;
+expect "root@%"
+
+## Enter CLI then  EDIT
+send -- "cli\r"
+expect "root> "
+send -- "edit\r"
+expect "root# "
+## Set the root password
+send -- "set system root-authentication plain-text-password\r"
+expect "set system root-authentication plain-text-password"
+expect "New password:"
+send -- "$srx_root_password\r"
+expect "Retype new password:"
+send -- "$srx_root_password\r"
+## Set netconf over SSH to allow additional configuration
+send -- "set system services netconf ssh\r"
+expect "root"
+## Set the IP address for the first interface 
+send -- "set interfaces ge-0/0/0 unit 0 family inet address $srx_ip\r"
+expect "root"
+## Set a default route
+send -- "set routing-options static route 0.0.0.0/0 next-hop 10.180.20.254\r"
+expect "root"
+## Commit the configuration
+send -- "commit and-quit\r"
+expect "root>"
+## Reboot as necessary
+#send -- "request system reboot\r"
+#sleep 1;
+#expect "Reboot"
+#send -- "y\r"
+#sleep 1;
+#expect "IMMEDIATELY"
+send -- "^]"
+exit
+expect eof

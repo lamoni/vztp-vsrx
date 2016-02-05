@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="03866d9b-300e-40cf-a924-2d0649c65eb1" name="a-inf-vansible1" url="http://a-inf-vansible1">
+        <fileTransfer host="a-inf-vansible1" port="22" rootFolder="/var/www/" accessType="SFTP" password="dfebdfc7df99dfd8dfe6dfeadfc8" username="root">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+      <webServer id="fb592701-abbe-499f-bbfd-1bb45b95e258" name="ubuntu1" url="http://192.168.0.18">
+        <fileTransfer host="192.168.0.18" port="22" rootFolder="/var/www/" accessType="SFTP" password="dfc6dfcbdfc7dfc5dfc4dfc3df9bdf98df99" username="lamoni">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>

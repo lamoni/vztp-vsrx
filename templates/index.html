@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block body %}
+<script src="/static/bower_components/jquery-form/jquery.form.js"></script>
+{% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul>
+        {% for message in messages %}
+            <li>{{ message }} </li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+{% endwith %}
+
+<div class="row">
+    <div class="col-lg-6 col-lg-offset-3">
+        <form id="formMACSearch" class="form" action="/api/instantiate" method="GET" role="form">
+            <div class="form-group">
+                <label>vCenter Credentials</label>
+                <div class="row">
+                    <div class="col-sm-6">
+                       <input type="text" name="vCenter_username" class="form-control" value="" placeholder="Username">
+                    </div>
+                    <div class="col-sm-6">
+                        <input type="password" name="vCenter_password" class="form-control" value="" placeholder="Password">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Base Name</label>
+                <div class="row">
+                    <div class="col-sm-12">
+                       <input type="text" name="base_name" class="form-control" value="" placeholder="e.g. MyVSRX">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>How many SRXs do you want?</label>
+                <div class="row">
+                    <div class="col-sm-12">
+                       <input type="text" name="number_of_devices" class="form-control" value="" placeholder="e.g. 10">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Start of the IP range?</label>
+                <div class="row">
+                    <div class="col-sm-12">
+                       <input type="text" name="start_of_ip_range" class="form-control" value="" placeholder="e.g. 10.0.0.1">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Start of the Telnet Port range?</label>
+                <div class="row">
+                    <div class="col-sm-12">
+                       <input type="text" name="start_of_telnet_port_range" class="form-control" value="" placeholder="Must be greater than 50000">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Root Password to set on SRXs?</label>
+                <div class="row">
+                    <div class="col-sm-12">
+                       <input type="password" name="password_for_srx" class="form-control" value="" placeholder="Password">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Space Credentials</label>
+                <div class="row">
+                    <div class="col-sm-6">
+                       <input type="text" name="space_username" class="form-control" value="" placeholder="Username">
+                    </div>
+                    <div class="col-sm-6">
+                        <input type="password" name="space_password" class="form-control" value="" placeholder="Password">
+                    </div>
+                </div>
+            </div>
+
+            <button id="buttonSubmit" type="submit" data-loading-text="Searching..." class="btn btn-success btn-block btn-lg">Instantiate</button>
+
+        </form>
+        <div id="result" style="display:none;">
+            <h3>Instantiation of vSRXs has begun</h3>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        $('#formMACSearch').submit(function(e) {
+            $('#alertSuccess').html('').hide();
+            $('#alertDanger').html('').hide();
+            $('#buttonSubmit').button('loading');
+
+            e.preventDefault();
+            var options = {
+                type: 'GET',
+                dataType: 'json',
+                success:       showResponse
+            };
+
+            $(this).ajaxSubmit(options);
+
+            $('#buttonSubmit').button('reset');
+
+            return false;
+        });
+
+
+        function showResponse(data) {
+            $('#result').show();
+            $('#tbody_arp').empty();
+            $.each(data.show_arp, function( index, value ) {
+                $('#tbody_arp').append('<tr><td>'+value[0]+'</td><td>'+value[1]+'</td><td>'+value[2]+'</td><td>'+value[3]+'</td><td>'+value[4]+'</td></tr>');
+            });
+
+            $('#tbody_eth').empty();
+            $.each(data.show_ethernet_switching_table, function( index, value ) {
+                $('#tbody_eth').append('<tr><td>'+value[0]+'</td><td>'+value[1]+'</td><td>'+value[2]+'</td><td>'+value[3]+'</td></tr>');
+            });
+
+            $('#tbody_int').empty();
+            $.each(data.show_interfaces, function( index, value ) {
+                $('#tbody_int').append('<tr><td>'+value[0]+'</td><td>'+value[1]+'</td><td>'+value[2]+'</td></tr>');
+            });
+        }
+    });
+</script>
+{% endblock %}
