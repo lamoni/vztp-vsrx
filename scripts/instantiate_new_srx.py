@@ -13,6 +13,7 @@ import getpass
 import ssl
 from pprint import pprint
 import subprocess
+from jnpr.space import rest, async
 
 def get_args():
     """ Get arguments from CLI """
@@ -199,7 +200,7 @@ def clone_vm(
     serial_spec.device = vim.vm.device.VirtualSerialPort()
     serial_spec.device.backing = vim.vm.device.VirtualSerialPort.URIBackingInfo()
     serial_spec.device.backing.direction = "client"
-    serial_spec.device.backing.serviceURI = "tcp://a-inf-vansible1:" + telnet_port
+    serial_spec.device.backing.serviceURI = "tcp://a-inf-vansible1:13370"
     #serial_spec.device.backing.serviceURI = "vSPC.py"
     #serial_spec.device.backing.proxyURI = " telnet://:" + telnet_port
     dev_changes.append(serial_spec)
@@ -211,6 +212,35 @@ def clone_vm(
     task = template.Clone(folder=destfolder, name=vm_name, spec=clonespec)
     wait_for_task(task)
 
+
+def update_serial_port(vm_obj):
+    """
+    :param vm_obj: Virtual Machine Object
+    :param si: Service Instance
+    :return: True if success
+    """
+    nic_label = 'Serial port 1'
+    virtual_nic_device = None
+    for dev in vm_obj.config.hardware.device:
+        if isinstance(dev, vim.vm.device.VirtualSerialPort) \
+                and dev.deviceInfo.label == nic_label:
+            virtual_nic_device = dev
+
+    virtual_nic_spec = vim.vm.device.VirtualDeviceSpec()
+    virtual_nic_spec.operation = vim.vm.device.VirtualDeviceSpec.Operation.edit
+    virtual_nic_spec.device = virtual_nic_device
+    virtual_nic_spec.device.key = virtual_nic_device.key
+    virtual_nic_spec.device.backing = virtual_nic_device.backing
+    virtual_nic_spec.device.backing.direction = "server"
+    virtual_nic_spec.device.backing.serviceURI = "tcp://a-inf-vansible1:12345"
+    dev_changes = []
+    dev_changes.append(virtual_nic_spec)
+    spec = vim.vm.ConfigSpec()
+    spec.deviceChange = dev_changes
+    task = vm_obj.ReconfigVM_Task(spec=spec)
+    wait_for_task(task)
+
+    return True
 
 def main():
     """
@@ -253,10 +283,35 @@ def main():
     # Run the expect script for configuring the devices with their IP address
     # cmd = ['/var/www/console-config.exp', args.new_srx_ip, args.new_srx_root_password, args.new_srx_telnet_port]
     # subprocess.Popen(cmd).wait()
-    cmd = ['/var/www/console-config.exp', args.new_srx_ip, args.new_srx_root_password, args.new_srx_telnet_port]
+    cmd = ['/var/www/console-config.exp', args.new_srx_ip, args.new_srx_root_password, "13370", args.vm_name]
     subprocess.Popen(cmd).wait()
 
-    print "Expect script currently provisioning bootstrap config"
+
+    print "Redirecting console port elsewhere..."
+    content = si.RetrieveContent()
+
+    vm_obj = get_obj(content, [vim.VirtualMachine], args.vm_name)
+
+    if vm_obj:
+        update_serial_port(vm_obj)
+        print 'VM Serial Port successfully redirected'
+
+    ############################
+
+    # print "Triggering Junos Space discovery"
+    #
+    # s = rest.Space(url='https://10.180.21.67',
+    #                user='super',
+    #                passwd='Am3rL@bAm3rL@b')
+    # devs = s.device_management.devices.get()
+    # result = s.device_management.discover_devices.post(
+    #     ipAddress=args.new_srx_ip,
+    #     sshCredential={'userName':'root', 'password': args.new_srx_root_password})
+    #
+    # print "Finished Space Discovery"
+
+
+
 
 # start this thing
 if __name__ == "__main__":

@@ -78,11 +78,11 @@
                 </div>
             </div>
 
-            <button id="buttonSubmit" type="submit" data-loading-text="Searching..." class="btn btn-success btn-block btn-lg">Instantiate</button>
+            <button id="buttonSubmit" type="submit" data-loading-text="Instantiating..." class="btn btn-success btn-block btn-lg">Instantiate</button>
 
         </form>
-        <div id="result" style="display:none;">
-            <h3>Instantiation of vSRXs has begun</h3>
+        <div id="result" style="display:none; text-align:center;">
+            <h3><i class="glyphicon glyphicon-ok"></i> Instantiation of vSRXs has begun</h3>
         </div>
     </div>
 </div>
@@ -103,7 +103,8 @@
 
             $(this).ajaxSubmit(options);
 
-            $('#buttonSubmit').button('reset');
+            $('#buttonSubmit')..prop("disabled",true);
+            //$('#buttonSubmit').button('reset');
 
             return false;
         });
@@ -111,20 +112,6 @@
 
         function showResponse(data) {
             $('#result').show();
-            $('#tbody_arp').empty();
-            $.each(data.show_arp, function( index, value ) {
-                $('#tbody_arp').append('<tr><td>'+value[0]+'</td><td>'+value[1]+'</td><td>'+value[2]+'</td><td>'+value[3]+'</td><td>'+value[4]+'</td></tr>');
-            });
-
-            $('#tbody_eth').empty();
-            $.each(data.show_ethernet_switching_table, function( index, value ) {
-                $('#tbody_eth').append('<tr><td>'+value[0]+'</td><td>'+value[1]+'</td><td>'+value[2]+'</td><td>'+value[3]+'</td></tr>');
-            });
-
-            $('#tbody_int').empty();
-            $.each(data.show_interfaces, function( index, value ) {
-                $('#tbody_int').append('<tr><td>'+value[0]+'</td><td>'+value[1]+'</td><td>'+value[2]+'</td></tr>');
-            });
         }
     });
 </script>

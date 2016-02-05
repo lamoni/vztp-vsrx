@@ -43,7 +43,7 @@ if {$force_conservative} {
 set srx_ip [lindex $argv 0]
 set srx_root_password [lindex $argv 1];
 set telnet_port [lindex $argv 2];
-
+set srx_hostname [lindex $argv 3]
 
 set timeout -1
 match_max 100000
@@ -99,15 +99,19 @@ send -- "$srx_root_password\r"
 ## Set netconf over SSH to allow additional configuration
 send -- "set system services netconf ssh\r"
 expect "root"
+send -- "set system host-name $srx_hostname\r"
+expect "root"
+send -- "set security zones security-zone untrust interfaces ge-0/0/0.0 host-inbound-traffic system-services netconf\r"
+expect "root"
 ## Set the IP address for the first interface 
-send -- "set interfaces ge-0/0/0 unit 0 family inet address $srx_ip\r"
+send -- "set interfaces ge-0/0/0 unit 0 family inet address $srx_ip/24\r"
 expect "root"
 ## Set a default route
-send -- "set routing-options static route 0.0.0.0/0 next-hop 10.180.20.254\r"
+send -- "set routing-options static route 0.0.0.0/0 next-hop 10.180.21.254\r"
 expect "root"
 ## Commit the configuration
 send -- "commit and-quit\r"
-expect "root>"
+expect "root"
 ## Reboot as necessary
 #send -- "request system reboot\r"
 #sleep 1;
