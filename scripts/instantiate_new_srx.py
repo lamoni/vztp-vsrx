@@ -296,7 +296,7 @@ def main():
         update_serial_port(vm_obj)
         print 'VM Serial Port successfully redirected'
 
-    ############################
+    ###########################
 
     # print "Triggering Junos Space discovery"
     #
@@ -304,15 +304,22 @@ def main():
     #                user='super',
     #                passwd='Am3rL@bAm3rL@b')
     # devs = s.device_management.devices.get()
+    # tm = async.TaskMonitor(s, 'test_DD_q')
+    #
+    #
     # result = s.device_management.discover_devices.post(
+    #     task_monitor=tm,
     #     ipAddress=args.new_srx_ip,
-    #     sshCredential={'userName':'root', 'password': args.new_srx_root_password})
+    #     manageDiscoveredSystemsFlag=True,
+    #     userName='root', password=args.new_srx_root_password)
+    #
+    # pu = tm.wait_for_task(result.id)
     #
     # print "Finished Space Discovery"
 
 
 
-
+    print "Completed, moving on..."
 # start this thing
 if __name__ == "__main__":
     main()

@@ -54,7 +54,7 @@
                 <label>Start of the Telnet Port range?</label>
                 <div class="row">
                     <div class="col-sm-12">
-                       <input type="text" name="start_of_telnet_port_range" class="form-control" value="" placeholder="Must be greater than 50000">
+                       <input type="text" name="start_of_telnet_port_range" class="form-control" value="" placeholder="Must be >= 50000">
                     </div>
                 </div>
             </div>
@@ -103,7 +103,9 @@
 
             $(this).ajaxSubmit(options);
 
-            $('#buttonSubmit')..prop("disabled",true);
+            $('#buttonSubmit').prop("disabled",true);
+            $('#result').show();
+
             //$('#buttonSubmit').button('reset');
 
             return false;
@@ -111,7 +113,9 @@
 
 
         function showResponse(data) {
-            $('#result').show();
+            $('#buttonSubmit').button('reset');
+            $('#result').html('<h3><i class="glyphicon glyphicon-ok"></i> Instantiation of vSRXs is complete</h3>')
+
         }
     });
 </script>

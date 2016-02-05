@@ -101,7 +101,7 @@ send -- "set system services netconf ssh\r"
 expect "root"
 send -- "set system host-name $srx_hostname\r"
 expect "root"
-send -- "set security zones security-zone untrust interfaces ge-0/0/0.0 host-inbound-traffic system-services netconf\r"
+send -- "set security zones security-zone untrust interfaces ge-0/0/0.0 host-inbound-traffic system-services all\r"
 expect "root"
 ## Set the IP address for the first interface 
 send -- "set interfaces ge-0/0/0 unit 0 family inet address $srx_ip/24\r"
