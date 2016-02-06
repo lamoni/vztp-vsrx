@@ -36,6 +36,7 @@ def api_instantiate():
     number_of_devices = int(request.args.get('number_of_devices'))
     start_of_ip_range = request.args.get('start_of_ip_range')
     password_for_srx = request.args.get('password_for_srx')
+    space_ip = request.args.get('space_ip')
     space_username = request.args.get('space_username')
     space_password = request.args.get('space_password')
     start_of_telnet_port_range = int(request.args.get('start_of_telnet_port_range'))
@@ -48,7 +49,7 @@ def api_instantiate():
     for current_ip_decimal in range(start_decimal, end_decimal):
         current_ip = socket.inet_ntoa(struct.pack('!L', current_ip_decimal))
 
-        cmd = ['/var/www/scripts/instantiate_new_srx.py', '-s=a-inf-vc1', '-u=' + vCenter_username , '-p=' + vCenter_password, '-v=' + base_name + '_' + str(start_of_telnet_port_range), '--template=Mos-BLANK-vSRX', '--datacenter-name=AmerLab', '--cluster-name=Prod_INTEL', '--datastore-name=NetApp-VM-1', '--new-srx-ip=' + current_ip, '--new-srx-root-password=' + password_for_srx, '--new-srx-telnet-port=' + str(start_of_telnet_port_range)]
+        cmd = ['/var/www/scripts/instantiate_new_srx.py', '-s=a-inf-vc1', '-u=' + vCenter_username , '-p=' + vCenter_password, '-v=' + base_name + '_' + str(start_of_telnet_port_range), '--template=Mos-BLANK-vSRX', '--datacenter-name=AmerLab', '--cluster-name=Prod_INTEL', '--datastore-name=NetApp-VM-1', '--new-srx-ip=' + current_ip, '--new-srx-root-password=' + password_for_srx, '--new-srx-telnet-port=' + str(start_of_telnet_port_range), '--space-ip=' + space_ip, '--space-username='+space_username, '--space-password='+space_password]
         # cmd = ['/usr/local/lib/python2.7.10/bin/python', '/var/www/scripts/instantiate_new_srx.py', '-s=192.168.0.17', '-u=' + vCenter_username , '-p=' + vCenter_password, '-v=' + base_name + '_' + str(start_of_telnet_port_range), '--template=VSRX', '--resource-pool=rp1', '--new-srx-ip=' + current_ip, '--new-srx-root-password=' + password_for_srx, '--new-srx-telnet-port=' + str(start_of_telnet_port_range)]
 
         subprocess.Popen(cmd).wait()

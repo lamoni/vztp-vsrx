@@ -13,7 +13,8 @@ import getpass
 import ssl
 from pprint import pprint
 import subprocess
-from jnpr.space import rest, async
+import urllib, urllib2, base64
+import time
 
 def get_args():
     """ Get arguments from CLI """
@@ -110,6 +111,23 @@ def get_args():
                             connect to the newly-instantiated SRX for bootstrap\
                             configuration')
 
+    parser.add_argument('--space-ip',
+                        required=True,
+                        action='store',
+                        help='The IP address of the Junos Space instance used to\
+                            manage the new VM')
+
+    parser.add_argument('--space-username',
+                        required=True,
+                        action='store',
+                        help='The username used to call API calls on the Junos Space\
+                            instance')
+
+    parser.add_argument('--space-password',
+                        required=True,
+                        action='store',
+                        help='The password used to call API calls on the Junos Space\
+                            instance')
 
     args = parser.parse_args()
 
@@ -286,6 +304,8 @@ def main():
     cmd = ['/var/www/console-config.exp', args.new_srx_ip, args.new_srx_root_password, "13370", args.vm_name]
     subprocess.Popen(cmd).wait()
 
+    cmd = ['/bin/ping', args.new_srx_ip, '-c10']
+    subprocess.Popen(cmd).wait()
 
     print "Redirecting console port elsewhere..."
     content = si.RetrieveContent()
@@ -298,24 +318,31 @@ def main():
 
     ###########################
 
-    # print "Triggering Junos Space discovery"
-    #
-    # s = rest.Space(url='https://10.180.21.67',
-    #                user='super',
-    #                passwd='Am3rL@bAm3rL@b')
-    # devs = s.device_management.devices.get()
-    # tm = async.TaskMonitor(s, 'test_DD_q')
-    #
-    #
-    # result = s.device_management.discover_devices.post(
-    #     task_monitor=tm,
-    #     ipAddress=args.new_srx_ip,
-    #     manageDiscoveredSystemsFlag=True,
-    #     userName='root', password=args.new_srx_root_password)
-    #
-    # pu = tm.wait_for_task(result.id)
-    #
-    # print "Finished Space Discovery"
+    time.sleep(30)
+    print "Triggering Junos Space discovery"
+
+    url = 'https://%s/api/space/device-management/discover-devices' % (args.space_ip)
+    payload = "<discover-devices> \
+            <ipAddressDiscoveryTarget>\
+                <ipAddress>%s</ipAddress>\
+            </ipAddressDiscoveryTarget>\
+            <usePing>true</usePing>\
+            <sshCredential>\
+                <userName>root</userName>\
+                <password>%s</password>\
+            </sshCredential>   \
+            <manageDiscoveredSystemsFlag>true</manageDiscoveredSystemsFlag>\
+        </discover-devices>" % (args.new_srx_ip, args.new_srx_root_password,)
+
+    gcontext = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
+    req = urllib2.Request(url, payload)
+    space_authorization_credentials = base64.encodestring('%s:%s' % (args.space_username, args.space_password, )).replace('\n', '')
+    req.add_header('authorization', 'Basic %s' % (space_authorization_credentials))
+    req.add_header('content-type', 'application/vnd.net.juniper.space.device-management.discover-devices+xml;version=2;charset=UTF-8')
+
+    response = urllib2.urlopen(req, context=gcontext).read()
+
+    print "Finished Space Discovery"
 
 
 
