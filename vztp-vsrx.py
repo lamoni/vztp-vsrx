@@ -50,22 +50,12 @@ def api_instantiate():
         current_ip = socket.inet_ntoa(struct.pack('!L', current_ip_decimal))
 
         cmd = ['/var/www/scripts/instantiate_new_srx.py', '-s=a-inf-vc1', '-u=' + vCenter_username , '-p=' + vCenter_password, '-v=' + base_name + '_' + str(start_of_telnet_port_range), '--template=Mos-BLANK-vSRX', '--datacenter-name=AmerLab', '--cluster-name=Prod_INTEL', '--datastore-name=NetApp-VM-1', '--new-srx-ip=' + current_ip, '--new-srx-root-password=' + password_for_srx, '--new-srx-telnet-port=' + str(start_of_telnet_port_range), '--space-ip=' + space_ip, '--space-username='+space_username, '--space-password='+space_password]
-        # cmd = ['/usr/local/lib/python2.7.10/bin/python', '/var/www/scripts/instantiate_new_srx.py', '-s=192.168.0.17', '-u=' + vCenter_username , '-p=' + vCenter_password, '-v=' + base_name + '_' + str(start_of_telnet_port_range), '--template=VSRX', '--resource-pool=rp1', '--new-srx-ip=' + current_ip, '--new-srx-root-password=' + password_for_srx, '--new-srx-telnet-port=' + str(start_of_telnet_port_range)]
 
         subprocess.Popen(cmd).wait()
 
         final[current_ip] = start_of_telnet_port_range
 
         start_of_telnet_port_range += 1
-
-
-
-
-
-
-    #HACKY - I could/should just import the instantiate_new_srx script as a module but... time constraints... for now
-    #NOTE - "Mos-BLANK-vSRX" shouldn't be hard-coded, but I'm trying to cut down on the amount of inputs we've got for this demo.
-    #NOTE - Pretty much anything that's hardcoded here should either be moved into an html input or to the config file
 
     return json.dumps(final)
 

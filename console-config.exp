@@ -56,6 +56,8 @@ spawn nc -l $telnet_port
 #############
 sleep 1;
 expect "login:"
+send_user "\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n"
+
 send "root\r"
 ## Uncomment below if device has a previous password
 #expect "password"
@@ -81,9 +83,11 @@ send "\r";
 sleep 1;
 expect "login:"
 send "root\r"
+
+
 sleep 2;
 expect "root@%"
-
+send_user "\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n"
 ## Enter CLI then  EDIT
 send -- "cli\r"
 expect "root> "

@@ -177,7 +177,7 @@ def clone_vm(
         cluster_name, resource_pool, telnet_port):
     """
     Clone a VM from a template/VM, datacenter_name, vm_folder, datastore_name
-    cluster_name, resource_pool, and power_on are all optional.
+    cluster_name, and resource_pool are all optional.
     """
 
     # if none git the first one
