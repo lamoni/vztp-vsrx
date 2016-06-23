@@ -1,6 +1,7 @@
 #!/usr/bin/expect -f
 
 ########
+#Author: Keir Asher 
 #Created with and for vSRX-12.1.  YMMV on other devices
 #2/3/16
 ########
